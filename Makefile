@@ -14,4 +14,4 @@ autofix_run:
 
 
 run_test:
-	PYTHONPATH=$(shell pwd) pytest-3 ./tests --exitfirst
+	PYTHONPATH=$(shell pwd) python3 -m pytest ./tests --exitfirst
