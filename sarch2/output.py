@@ -1,12 +1,11 @@
 
 
+def info(string, *pargs):
 
-def info( string, *pargs ):
-    
-    string = string.format( *pargs )
+    string = string.format(*pargs)
     print(string)
 
 
-def debug( string, *pargs ):
-    string = string.format( *pargs )
+def debug(string, *pargs):
+    string = string.format(*pargs)
     print(string)
