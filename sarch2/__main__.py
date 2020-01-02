@@ -68,6 +68,7 @@ The sarch2 commands are:
             log.debug("No DB found!")
             raise SarchExceptionNoDB("Could not find database!")
         log.debug("Database found: %s" % path)
+        
         self.repo = database.Database(path)
 
         filesystem.set_workdir(self.repo.path_abs)
@@ -166,13 +167,13 @@ The sarch2 commands are:
         return parser
 
     def import_exe(self, config):
-        paths = filesystem.make_absolute(config.path)
+        
         if config.dry_run:
-            worker = commands.WokerImportPrint()
+            worker = commands.WorkerImportPrint()
         else:
-            worker = commands.WokerImport()
+            worker = commands.WorkerImport()
         with self._open_db_and_cwd(True):
-            for path in paths:
+            for path in config.path:
                 commands.full_scan_import(
                     worker=worker, path=path, repo=self.repo)
             if not config.dry_run:

@@ -1,5 +1,6 @@
 
 import abc
+from pathlib import Path
 
 from . import filesystem
 from . import output
@@ -83,7 +84,7 @@ class WorkerBase(abc.ABC):
 
 
 def full_scan_import(repo, path, worker):
-
+    path = Path( path ).resolve()
     fs_iter = filesystem.get_iterator(path)
 
     for fs_item in fs_iter:

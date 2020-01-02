@@ -72,11 +72,11 @@ def set_workdir(path):
     PATH_WORK = Path(path).resolve()
 
 
-def import_file(filename, target_path):
-    info = FileInfo(filename, no_checksum=False)
+def import_file(info, target_path):
+    
     time_prefix = datetime.datetime.fromtimestamp(
         info.timestamp).strftime(ADD_FROM_DATE_FORMAT)
-    target_file = Path(target_path) / Path(time_prefix) / Path(filename).name
+    target_file = Path(target_path) / Path(time_prefix) / Path(info.name).name
     return FileInfo_Pure(target_file, info)
 
 
