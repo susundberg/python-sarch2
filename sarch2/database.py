@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 from contextlib import contextmanager
 
-from . import filesystem
 from . import common
 
 log = common.setup_log("db")
@@ -17,7 +16,8 @@ STATUS_INVALID = 0
 STATUS_OK = 1
 STATUS_DEL = 2
 
-TABLE_DESC = "filename STRING UNIQUE NOT NULL , size UNSIGNED INTEGER NOT NULL, timestamp UNSIGNED INTEGER NOT NULL, checksum STRING NOT NULL, status INTEGER NOT NULL, db_time UNSIGNED INTEGER NOT NULL "
+TABLE_DESC = ("filename STRING UNIQUE NOT NULL , size UNSIGNED INTEGER NOT NULL, timestamp UNSIGNED INTEGER NOT NULL,"
+              "checksum STRING NOT NULL, status INTEGER NOT NULL, db_time UNSIGNED INTEGER NOT NULL ")
 
 
 class FileDB(common.FileBase):

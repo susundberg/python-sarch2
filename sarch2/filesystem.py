@@ -37,7 +37,7 @@ def get_iterator(path):
     elif path.is_dir():
         for item in path.iterdir():
             yield from get_iterator(item)
-    elif path.exists() == False:
+    elif not path.exists():
         raise FileNotFoundError("File does not exists: '%s'" % path)
     else:
         raise FileNotFoundError("Unkown file type: '%s'" % path)
@@ -59,7 +59,6 @@ def remove_empty_dir(path):
 
     while len(path.parts) >= 0:
         log.debug("Remove dir: %s", path)
-        n_items = 0
         for item in path.iterdir():
             return
         # No items in the directory, this can be removed
