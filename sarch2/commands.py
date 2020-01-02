@@ -118,65 +118,65 @@ def full_scan_import(repo, path, worker):
                 raise Exception("Unknown DB status: '%s'" % db_info.status)
 
 
-def full_scan(repo, path, worker, flag_verify=False):
+def full_scan_work_db(fs_check_done, repo, path, worker):
+    for db_info in repo.get_iterator(path):
 
-    def work_db(fs_check_done):
+        if db_info.name in fs_check_done:
+            continue  # This file was processed
 
-        for db_info in repo.get_iterator(path):
+        # Ok, this file is in database, but not in FS
+        worker.fs_info = None
+        worker.db_info = db_info
 
-            if db_info.name in fs_check_done:
-                continue  # This file was processed
+        if db_info.status == database.STATUS_OK:
+            worker.action_normal_missing()
+        elif db_info.status == database.STATUS_DEL:
+            worker.action_del_ok()
+        else:
+            raise Exception("Unknown DB status: '%s'" % db_info.status)
 
-            # Ok, this file is in database, but not in FS
-            worker.fs_info = None
-            worker.db_info = db_info
 
+def full_scan_work_fs(repo, path, worker, flag_verify):
+    fs_iter = filesystem.get_iterator(path)
+    fs_check_done = set()
+
+    for fs_item in fs_iter:
+        fs_check_done.add(fs_item)
+
+        fs_info = filesystem.get_info(fs_item, no_checksum=flag_verify)
+
+        worker.fs_info = fs_info
+        worker.db_info = None
+
+        db_info = repo.get(fs_item)
+        worker.db_info = db_info
+
+        if db_info is None:
+            worker.action_none_normal()
+        else:
             if db_info.status == database.STATUS_OK:
-                worker.action_normal_missing()
+                if fs_info.equals(db_info):
+                    worker.action_normal_ok()  # File seems to be same, continue to next
+                else:
+                    # File has changed
+                    worker.action_normal_changed()
+
             elif db_info.status == database.STATUS_DEL:
-                worker.action_del_ok()
+                # The file exists in FS, altough marked as deleted
+                fs_info.calc_checksum()
+
+                if fs_info.equals(db_info):
+                    worker.action_del_re_appear()
+                else:
+                    worker.action_del_conflict()
             else:
                 raise Exception("Unknown DB status: '%s'" % db_info.status)
+    return fs_check_done
 
-    def work_fs():
-        fs_iter = filesystem.get_iterator(path)
-        fs_check_done = set()
 
-        for fs_item in fs_iter:
-            fs_check_done.add(fs_item)
-
-            fs_info = filesystem.get_info(fs_item, no_checksum=flag_verify)
-
-            worker.fs_info = fs_info
-            worker.db_info = None
-
-            db_info = repo.get(fs_item)
-            worker.db_info = db_info
-
-            if db_info is None:
-                worker.action_none_normal()
-            else:
-                if db_info.status == database.STATUS_OK:
-                    if fs_info.equals(db_info):
-                        worker.action_normal_ok()  # File seems to be same, continue to next
-                    else:
-                        # File has changed
-                        worker.action_normal_changed()
-
-                elif db_info.status == database.STATUS_DEL:
-                    # The file exists in FS, altough marked as deleted
-                    fs_info.calc_checksum()
-
-                    if fs_info.equals(db_info):
-                        worker.action_del_re_appear()
-                    else:
-                        worker.action_del_conflict()
-                else:
-                    raise Exception("Unknown DB status: '%s'" % db_info.status)
-        return fs_check_done
-
-    fs_checked = work_fs()
-    work_db(fs_checked)
+def full_scan(repo, path, worker, flag_verify=False):
+    fs_checked = full_scan_work_fs(repo, path, worker, flag_verify)
+    full_scan_work_db(fs_checked, repo, path, worker)
 
 
 class WorkerImportPrint(WorkerImportBase):

@@ -16,8 +16,9 @@ STATUS_INVALID = 0
 STATUS_OK = 1
 STATUS_DEL = 2
 
-TABLE_DESC = ("filename STRING UNIQUE NOT NULL , size UNSIGNED INTEGER NOT NULL, timestamp UNSIGNED INTEGER NOT NULL,"
-              "checksum STRING NOT NULL, status INTEGER NOT NULL, db_time UNSIGNED INTEGER NOT NULL ")
+TABLE_DESC = (
+    "filename STRING UNIQUE NOT NULL , size UNSIGNED INTEGER NOT NULL, timestamp UNSIGNED INTEGER NOT NULL,"
+    "checksum STRING NOT NULL, status INTEGER NOT NULL, db_time UNSIGNED INTEGER NOT NULL ")
 
 
 class FileDB(common.FileBase):
@@ -42,7 +43,7 @@ class Database():
 
     @contextmanager
     def db_connection(self, commit):
-        #log.debug("Open DB: %s - commit %d", self.path_db, commit  )
+        # log.debug("Open DB: %s - commit %d", self.path_db, commit  )
         self.conn = sqlite3.connect(self.path_db)
         yield True
         if commit:
@@ -65,7 +66,7 @@ class Database():
 
     def get_iterator(self, path):
         path = str(path)
-        #log.debug("Get iterator: '%s'", path )
+        # log.debug("Get iterator: '%s'", path )
         with self.db_cursor() as c:
 
             if path == "" or path == ".":
@@ -75,7 +76,7 @@ class Database():
                     "SELECT * FROM files WHERE filename LIKE ?", (path + r"%", ))
 
             for row in c.fetchall():
-                #log.debug("GOT: %s", row )
+                # log.debug("GOT: %s", row )
                 yield FileDB(row)
 
     def add(self, file_info):
@@ -89,13 +90,13 @@ class Database():
                        int(time.time())))
 
     def get(self, filename):
-        #log.debug("Get: %s", filename )
+        # log.debug("Get: %s", filename )
         with self.db_cursor() as c:
             c.execute("SELECT * FROM files WHERE filename=?", (str(filename),))
             row = c.fetchone()
             if row is None:
                 return None
-            #log.debug("GOT: %s", row)
+            # log.debug("GOT: %s", row)
             return FileDB(row)
 
     def update(self, file_info, status=None):
@@ -113,7 +114,7 @@ class Database():
             assert(c.rowcount == 1)
 
     def remove(self, filename):
-        #log.debug("Remove: %s", filename )
+        # log.debug("Remove: %s", filename )
         with self.db_cursor() as c:
             c.execute("UPDATE files SET status=?, db_time=? WHERE filename=?",
                       (STATUS_DEL, int(time.time()), str(filename),))
