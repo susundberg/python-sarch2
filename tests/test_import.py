@@ -3,6 +3,8 @@ import unittest
 import os
 import datetime
 
+from pathlib import Path
+
 unique_name = common.unique_name
 
 
@@ -52,7 +54,15 @@ class Test(common.TestBase):
         self.repo.cmd("import", str(self.other.path))
         self.repo.cmd("status")
         self.repo.file_check("2019-01/imp_3", exists=False)
-
+    
+    def test_2_subdir( self ):
+        self.make_import()
+        os.chdir( self.repo.path / Path("sub2") )
+        self.repo.cmd("import", str(self.other.path))
+        self.repo.cmd("status")
+        self.repo.file_check("sub2/2019-01/imp_3", exists=True)
+        
+        
 
 if __name__ == "__main__":
     unittest.main()
