@@ -201,6 +201,7 @@ The sarch2 commands are:
             for path in config.path:
                 commands.full_scan_import(
                     worker=worker, path=path, repo=self.repo)
+
             if not config.dry_run:
                 self.repo.save()
 
