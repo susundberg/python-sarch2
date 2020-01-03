@@ -160,7 +160,7 @@ The sarch2 commands are:
     def sync_cmd(self):
         parser = argparse.ArgumentParser(
             description='Sync with remote repository')
-        parser.add_argument('path', nargs=1, help="What path to sync with (rsync target)")
+        parser.add_argument('url', nargs=1, help="What path to sync with (rsync target)")
         parser.add_argument(
             '--dry-run',
             action='store_true',
@@ -169,16 +169,10 @@ The sarch2 commands are:
 
     def sync_exe(self, config):
         with self._open_db_and_cwd(False):
-            if config.dry_run:
-                worker = commands.WorkerSyncPrint()
-            else:
-                worker = commands.WorkerSync(self.repo)
+           ts_local = filesystem.get_timestamp( self.repo.path_db )
+        remotes.sync( config.url, db_older_than = ts_local, dry_run = config.dry_run )
+        
 
-            # First try to copy remote
-            commands.full_scan_import(
-                    worker=worker, path=path, repo=self.repo)
-            if not config.dry_run:
-                self.repo.save()
                 
     def import_cmd(self):
         parser = argparse.ArgumentParser(
@@ -191,7 +185,6 @@ The sarch2 commands are:
         return parser
 
     def import_exe(self, config):
-
         with self._open_db_and_cwd(False):
             if config.dry_run:
                 worker = commands.WorkerImportPrint()
