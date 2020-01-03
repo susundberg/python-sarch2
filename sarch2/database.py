@@ -37,8 +37,9 @@ class Database():
         pathobj = Path(path).resolve()
         self.path_abs = pathobj.parent
         self.path_db = str(pathobj)
+        self.path_current = Path.cwd().relative_to(self.path_abs)
 
-        log.debug("INIT DB at: %s - %s ", self.path_db, pathobj.suffix)
+        log.debug("INIT DB at: %s - curr: %s", self.path_db, self.path_current)
         assert(pathobj.suffix == ".db")
 
     @contextmanager
@@ -100,7 +101,6 @@ class Database():
             return FileDB(row)
 
     def update(self, file_info, status=None):
-
         with self.db_cursor() as c:
             cmd = "size=?, timestamp=?, checksum=?, db_time=?"
             values = [file_info.size, file_info.timestamp,

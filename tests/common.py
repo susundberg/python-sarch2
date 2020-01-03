@@ -20,25 +20,25 @@ class RepoDir:
     def tempdir_new(self):
         if self.path:
             self.tempdir_clear()
-        self.path = tempfile.mkdtemp()
+        self.path = Path(tempfile.mkdtemp())
 
     def tempdir_clear(self):
         shutil.rmtree(self.path)
 
     def dir_check(self, filename, exists):
-        f = Path(filename)
+        f = (Path(self.path) / Path(filename)).resolve()
         assert(f.is_dir() == exists)
         if not exists:
             assert(f.exists() == False)
 
     def file_check(self, filename, exists):
-        f = Path(filename)
+        f = (Path(self.path) / Path(filename)).resolve()
         assert(f.is_file() == exists)
         if not exists:
             assert(f.exists() == False)
 
     def file_del(self, filename):
-        fn = Path(filename)
+        fn = (Path(self.path) / Path(filename)).resolve()
         os.unlink(str(fn))
 
     def file_copy(self, filename_source, filename_target):
@@ -70,7 +70,7 @@ class RepoDir:
             filenames = (filenames,)
 
         for filename in filenames:
-            absname_path = Path(filename).resolve()
+            absname_path = (Path(self.path) / Path(filename)).resolve()
             absname = str(absname_path)
 
             subprocess.run(("mkdir", "-p", absname_path.parent), check=True)
@@ -81,7 +81,7 @@ class RepoDir:
             with open(absname, 'wb') as fid:
                 fid.write(bytes(content, "utf8"))
 
-            os.utime(str(filename), (timestamp, timestamp))
+            os.utime(str(absname), (timestamp, timestamp))
 
     def create_base1(self):
         self.file_make("root_file_1")
