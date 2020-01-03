@@ -20,7 +20,7 @@ class RepoDir:
     def tempdir_new(self):
         if self.path:
             self.tempdir_clear()
-        self.path = Path( tempfile.mkdtemp() )
+        self.path = Path(tempfile.mkdtemp())
 
     def tempdir_clear(self):
         shutil.rmtree(self.path)

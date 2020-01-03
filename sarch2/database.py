@@ -37,10 +37,9 @@ class Database():
         pathobj = Path(path).resolve()
         self.path_abs = pathobj.parent
         self.path_db = str(pathobj)
-        self.path_current = Path.cwd().relative_to( self.path_abs )
-        
+        self.path_current = Path.cwd().relative_to(self.path_abs)
 
-        log.debug("INIT DB at: %s - curr: %s", self.path_db, self.path_current )
+        log.debug("INIT DB at: %s - curr: %s", self.path_db, self.path_current)
         assert(pathobj.suffix == ".db")
 
     @contextmanager

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import datetime
+import subprocess
 
 from . import common
 
@@ -73,11 +74,20 @@ def set_workdir(path):
 
 
 def import_file(info, target_path):
-    
     time_prefix = datetime.datetime.fromtimestamp(
         info.timestamp).strftime(ADD_FROM_DATE_FORMAT)
     target_file = Path(target_path) / Path(time_prefix) / Path(info.name).name
     return FileInfo_Pure(target_file, info)
+
+
+def import_file_do(info):
+    # Make directories
+    subprocess.run(("mkdir", "-p", info.name.parent), check=True)
+    subprocess.run(("cp",
+                    "--preserve=mode,timestamps",
+                    str(info.path_content),
+                    str(info.name)),
+                   check=True)
 
 
 def make_absolute(path):
@@ -98,6 +108,7 @@ class FileInfo_Pure(common.FileBase):
         self.name = Path(new_name)
         self.size = old_info.size
         self.checksum = old_info.checksum
+        self.path_content = Path(old_info.name)
 
 
 class FileInfo(common.FileBase):

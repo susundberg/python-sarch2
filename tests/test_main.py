@@ -3,6 +3,7 @@
 import common
 import unittest
 import os
+from pathlib import Path
 
 unique_name = common.unique_name
 
@@ -101,12 +102,12 @@ class Test(common.TestBase):
     def test_5_subdir(self):
         self.repo.file_make("sub2/" + unique_name())
         self.repo.cmd("status", ".", assume_fail=True)
-        os.chdir(self.repo.path + "/sub1")
+        os.chdir( self.repo.path / Path("sub1") )
         self.repo.cmd("status", ".")
         self.repo.cmd("save")
         os.chdir(self.repo.path)
         self.repo.cmd("status", ".", assume_fail=True)
-        os.chdir(self.repo.path + "/sub2")
+        os.chdir(self.repo.path / Path("sub2") )
         self.repo.cmd("status", ".", assume_fail=True)
         self.repo.cmd("save")
         self.repo.cmd("status", ".")

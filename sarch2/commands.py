@@ -84,7 +84,7 @@ class WorkerBase(abc.ABC):
 
 
 def full_scan_import(repo, path, worker):
-    path = Path( path ).resolve()
+    path = Path(path).resolve()
     fs_iter = filesystem.get_iterator(path)
 
     for fs_item in fs_iter:
@@ -197,10 +197,45 @@ class WorkerImportPrint(WorkerImportBase):
         output.debug("SKIP-NORMAL: {}", self.fs_info.name)
 
     def action_import_normal_conflict(self):
-        output.debug("CONFLICT-NORMAL: {}", self.fs_info.name)
+        output.info("CONFLICT-NORMAL: {}", self.fs_info.name)
 
     def action_import_normal_older(self):
         output.debug("SKIP-NORMAL-OLD: {}", self.fs_info.name)
+
+
+class WorkerImport(WorkerImportBase):
+
+    def __init__(self, repo):
+        super().__init__()
+        self.repo = repo
+
+    def action_import_none(self):
+        self.repo.add(self.fs_info)
+        filesystem.import_file_do(self.fs_info)
+
+    def action_import_del_equal(self):
+        output.debug("SKIP-DELETED: {}", self.fs_info.name)
+
+    def action_import_del_conflict(self):
+        output.info(
+            "CONFLICT-DELETED: {} -> SKIP (db deleted older than imported)",
+            self.fs_info.name)
+
+    def action_import_del_older(self):
+        output.info("SKIP-DELETED-OLD: {}", self.fs_info.name)
+
+    def action_import_normal_equal(self):
+        output.debug("SKIP-NORMAL: {}", self.fs_info.name)
+
+    def action_import_normal_conflict(self):
+        output.info(
+            "CONFLICT-NORMAL: {} -> SKIP (file meta not match)",
+            self.fs_info.name)
+
+    def action_import_normal_older(self):
+        output.info(
+            "SKIP-NORMAL-OLD: {} -> SKIP (file older than DB)",
+            self.fs_info.name)
 
 
 class WorkerSave(WorkerBase):
