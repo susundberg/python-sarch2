@@ -32,6 +32,7 @@ The sarch2 commands are:
    status   <>|<path>   Shows status of files, resolves conflicts
    save     <fn>        Saves given file to REPO
    import   <path>      Imports given path to current REPO
+   sync     <path>      Sync with remote database (rsync target)
 ''')
 
         parser.add_argument('command', help='Subcommand to run')
@@ -156,6 +157,29 @@ The sarch2 commands are:
                     flag_verify=config.verify)
         return worker.status_ok()
 
+    def sync_cmd(self):
+        parser = argparse.ArgumentParser(
+            description='Sync with remote repository')
+        parser.add_argument('path', nargs=1, help="What path to sync with (rsync target)")
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help="Do not really sync but print what would happen")
+        return parser
+
+    def sync_exe(self, config):
+        with self._open_db_and_cwd(False):
+            if config.dry_run:
+                worker = commands.WorkerSyncPrint()
+            else:
+                worker = commands.WorkerSync(self.repo)
+
+            # First try to copy remote
+            commands.full_scan_import(
+                    worker=worker, path=path, repo=self.repo)
+            if not config.dry_run:
+                self.repo.save()
+                
     def import_cmd(self):
         parser = argparse.ArgumentParser(
             description='Import files from given path')
@@ -177,7 +201,6 @@ The sarch2 commands are:
             for path in config.path:
                 commands.full_scan_import(
                     worker=worker, path=path, repo=self.repo)
-
             if not config.dry_run:
                 self.repo.save()
 
