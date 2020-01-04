@@ -7,6 +7,7 @@ from . import commands
 from . import filesystem
 from . import database
 from . import common
+from . import remotes
 
 
 class SarchException(Exception):
