@@ -8,7 +8,6 @@ class SarchException(Exception):
     pass
 
 
-
 def setup_log(name):
 
     global LOG

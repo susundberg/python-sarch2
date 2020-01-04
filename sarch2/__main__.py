@@ -10,10 +10,8 @@ from . import common
 from . import remotes
 
 
-
 class SarchExceptionNoDB(common.SarchException):
     pass
-
 
 
 log = common.setup_log("main")
@@ -159,7 +157,8 @@ The sarch2 commands are:
     def sync_cmd(self):
         parser = argparse.ArgumentParser(
             description='Sync with remote repository')
-        parser.add_argument('url', help="What path to sync with (rsync target)")
+        parser.add_argument(
+            'url', help="What path to sync with (rsync target)")
         parser.add_argument(
             '--dry-run',
             action='store_true',
@@ -167,16 +166,14 @@ The sarch2 commands are:
         return parser
 
     def sync_exe(self, config):
-        
+
         if config.url[-1] != "/":
             config.url += "/"
-            
-        with self._open_db_and_cwd(False):
-           
-           remotes.sync( config.url, self.repo, dry_run = config.dry_run )
-        
 
-                
+        with self._open_db_and_cwd(False):
+
+            remotes.sync(config.url, self.repo, dry_run=config.dry_run)
+
     def import_cmd(self):
         parser = argparse.ArgumentParser(
             description='Import files from given path')
