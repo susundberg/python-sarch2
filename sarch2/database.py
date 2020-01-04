@@ -33,12 +33,16 @@ class FileDB(common.FileBase):
 
 class Database():
 
-    def __init__(self, path):
+    def __init__(self, path, relative = True ):
         pathobj = Path(path).resolve()
         self.path_abs = pathobj.parent
         self.path_db = str(pathobj)
-        self.path_current = Path.cwd().relative_to(self.path_abs)
-
+        
+        if relative:
+           self.path_current = Path.cwd().relative_to(self.path_abs)
+        else:
+            self.path_current = None
+            
         log.debug("INIT DB at: %s - curr: %s", self.path_db, self.path_current)
         assert(pathobj.suffix == ".db")
 

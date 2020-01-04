@@ -10,12 +10,10 @@ from . import common
 from . import remotes
 
 
-class SarchException(Exception):
+
+class SarchExceptionNoDB(common.SarchException):
     pass
 
-
-class SarchExceptionNoDB(SarchException):
-    pass
 
 
 log = common.setup_log("main")
@@ -42,7 +40,7 @@ The sarch2 commands are:
 
         if not hasattr(self, args.command + "_exe"):
             parser.print_help()
-            raise SarchException('Unrecognized command')
+            raise common.SarchException('Unrecognized command')
 
         parser_sub_create = getattr(self, args.command + "_cmd")
         parser_sub = parser_sub_create()
@@ -88,7 +86,7 @@ The sarch2 commands are:
     def init_exe(self, config):
         try:
             with self._open_db_and_cwd(False):
-                raise SarchException("Repository exists already!")
+                raise common.SarchException("Repository exists already!")
         except SarchExceptionNoDB:
             pass
 
@@ -161,7 +159,7 @@ The sarch2 commands are:
     def sync_cmd(self):
         parser = argparse.ArgumentParser(
             description='Sync with remote repository')
-        parser.add_argument('url', nargs=1, help="What path to sync with (rsync target)")
+        parser.add_argument('url', help="What path to sync with (rsync target)")
         parser.add_argument(
             '--dry-run',
             action='store_true',
@@ -169,9 +167,13 @@ The sarch2 commands are:
         return parser
 
     def sync_exe(self, config):
+        
+        if config.url[-1] != "/":
+            config.url += "/"
+            
         with self._open_db_and_cwd(False):
-           ts_local = filesystem.get_timestamp( self.repo.path_db )
-        remotes.sync( config.url, db_older_than = ts_local, dry_run = config.dry_run )
+           
+           remotes.sync( config.url, self.repo, dry_run = config.dry_run )
         
 
                 
@@ -203,6 +205,6 @@ The sarch2 commands are:
 if __name__ == '__main__':
     try:
         Sarch2()
-    except SarchException as err:
+    except common.SarchException as err:
         print("Error: %s" % err)
         exit(1)
