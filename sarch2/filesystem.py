@@ -111,6 +111,10 @@ class FileInfo_Pure(common.FileBase):
         self.path_content = Path(old_info.name)
 
 
+def get_timestamp(path, multiply=1):
+    return int(Path(path).stat().st_mtime * multiply)
+
+
 class FileInfo(common.FileBase):
     def __init__(self, path, no_checksum=True):
         self.name = Path(path)

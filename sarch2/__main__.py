@@ -7,13 +7,10 @@ from . import commands
 from . import filesystem
 from . import database
 from . import common
+from . import remotes
 
 
-class SarchException(Exception):
-    pass
-
-
-class SarchExceptionNoDB(SarchException):
+class SarchExceptionNoDB(common.SarchException):
     pass
 
 
@@ -32,6 +29,7 @@ The sarch2 commands are:
    status   <>|<path>   Shows status of files, resolves conflicts
    save     <fn>        Saves given file to REPO
    import   <path>      Imports given path to current REPO
+   sync     <path>      Sync with remote database (rsync target)
 ''')
 
         parser.add_argument('command', help='Subcommand to run')
@@ -40,7 +38,7 @@ The sarch2 commands are:
 
         if not hasattr(self, args.command + "_exe"):
             parser.print_help()
-            raise SarchException('Unrecognized command')
+            raise common.SarchException('Unrecognized command')
 
         parser_sub_create = getattr(self, args.command + "_cmd")
         parser_sub = parser_sub_create()
@@ -86,7 +84,7 @@ The sarch2 commands are:
     def init_exe(self, config):
         try:
             with self._open_db_and_cwd(False):
-                raise SarchException("Repository exists already!")
+                raise common.SarchException("Repository exists already!")
         except SarchExceptionNoDB:
             pass
 
@@ -156,6 +154,26 @@ The sarch2 commands are:
                     flag_verify=config.verify)
         return worker.status_ok()
 
+    def sync_cmd(self):
+        parser = argparse.ArgumentParser(
+            description='Sync with remote repository')
+        parser.add_argument(
+            'url', help="What path to sync with (rsync target)")
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help="Do not really sync but print what would happen")
+        return parser
+
+    def sync_exe(self, config):
+
+        if config.url[-1] != "/":
+            config.url += "/"
+
+        with self._open_db_and_cwd(False):
+
+            remotes.sync(config.url, self.repo, dry_run=config.dry_run)
+
     def import_cmd(self):
         parser = argparse.ArgumentParser(
             description='Import files from given path')
@@ -167,7 +185,6 @@ The sarch2 commands are:
         return parser
 
     def import_exe(self, config):
-
         with self._open_db_and_cwd(False):
             if config.dry_run:
                 worker = commands.WorkerImportPrint()
@@ -185,6 +202,6 @@ The sarch2 commands are:
 if __name__ == '__main__':
     try:
         Sarch2()
-    except SarchException as err:
+    except common.SarchException as err:
         print("Error: %s" % err)
         exit(1)

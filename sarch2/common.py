@@ -4,6 +4,10 @@ LOG = None
 BASENAME = "supa"
 
 
+class SarchException(Exception):
+    pass
+
+
 def setup_log(name):
 
     global LOG
