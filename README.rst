@@ -23,7 +23,9 @@ Importing existin backup stuff:
 1. Create local machine repository
 1.1. Add all wanted files
 
-2. Create remote repository - EMPTY
+2. Create remote repository - EMPTY. 
+2.1 Or you can just create empty repository at local machine and copy the .sarch2.db file to the target directory
+
 3. Do sync -- the sync is done with RSYNC so no extra files should be transferred 
 
 BEWARE THIS WILL REMOVE ALL FILES THAT ARE NOT IN LOCAL MACHINE FROM REMOTE
