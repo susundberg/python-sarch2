@@ -122,11 +122,12 @@ def get_timestamp(path, multiply=1):
 class FileInfo(common.FileBase):
     def __init__(self, path, no_checksum=True):
         self.name = Path(path)
+        
 
         stat = self.name.stat()
         self.timestamp = int(stat.st_mtime)
         self.size = int(stat.st_size)
-        if no_checksum:
+        if no_checksum == True:
             self.checksum = None
         else:
             self.calc_checksum()

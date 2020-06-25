@@ -42,8 +42,11 @@ class FileBase:
         self.timestamp = None
         self.checksum = None
 
-    def equals(self, other):
-        for attr in ["name", "size", "timestamp", "checksum"]:
+    def equals(self, other, has_checksum = True ):
+        to_check = ["name", "size", "timestamp"]
+        if has_checksum:
+            to_check.append( "checksum" )
+        for attr in to_check:
             if getattr(self, attr) != getattr(other, attr):
                 return False
         return True

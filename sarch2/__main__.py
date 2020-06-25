@@ -152,6 +152,7 @@ The sarch2 (v1.0.1) commands are:
                     worker=worker,
                     repo=self.repo,
                     flag_verify=config.verify)
+        log.info("Files %d/%d nominal" % (worker.ok_files, worker.total_files ))     
         return worker.status_ok()
 
     def sync_cmd(self):

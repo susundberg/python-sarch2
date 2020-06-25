@@ -51,6 +51,9 @@ class WorkerBase(abc.ABC):
         self.fs_info = None
         self.status = 0
 
+    def action_all_files( self ):
+        pass
+
     @abc.abstractmethod
     def action_normal_missing(self):
         pass
@@ -95,6 +98,7 @@ def full_scan_import(repo, path, worker):
 
         worker.db_info = db_info
         worker.fs_info = fs_info_new
+        
 
         if db_info is None:
             worker.action_import_none()
@@ -140,23 +144,24 @@ def full_scan_work_db(fs_check_done, repo, path, worker):
 def full_scan_work_fs(repo, path, worker, flag_verify):
     fs_iter = filesystem.get_iterator(path)
     fs_check_done = set()
-
+    
     for fs_item in fs_iter:
         fs_check_done.add(fs_item)
 
-        fs_info = filesystem.get_info(fs_item, no_checksum=flag_verify)
+        fs_info = filesystem.get_info(fs_item, no_checksum=not flag_verify)
 
         worker.fs_info = fs_info
         worker.db_info = None
 
         db_info = repo.get(fs_item)
         worker.db_info = db_info
+        worker.action_all_files()
 
         if db_info is None:
             worker.action_none_normal()
         else:
             if db_info.status == database.STATUS_OK:
-                if fs_info.equals(db_info):
+                if fs_info.equals(db_info, has_checksum = flag_verify ):
                     worker.action_normal_ok()  # File seems to be same, continue to next
                 else:
                     # File has changed
@@ -175,7 +180,7 @@ def full_scan_work_fs(repo, path, worker, flag_verify):
     return fs_check_done
 
 
-def full_scan(repo, path, worker, flag_verify=False):
+def full_scan(repo, path, worker, flag_verify=True):
     fs_checked = full_scan_work_fs(repo, path, worker, flag_verify)
     full_scan_work_db(fs_checked, repo, path, worker)
 
@@ -276,6 +281,13 @@ class WorkerSave(WorkerBase):
 
 
 class WorkerStatus(WorkerBase):
+    def __init__(self, *pargs, **kwargs ):
+        super().__init__( *pargs, **kwargs )
+        self.ok_files = 0
+        self.total_files = 0
+
+    def action_all_files( self ):
+        self.total_files += 1
 
     def action_normal_missing(self):
         output.info("MISSING: {}", self.db_info.name)
@@ -283,6 +295,7 @@ class WorkerStatus(WorkerBase):
 
     def action_normal_ok(self):
         output.debug("OK: {}", self.fs_info.name)
+        self.ok_files += 1
 
     def action_normal_changed(self):
         output.info("CHANGED: {}", self.fs_info.name)
@@ -294,6 +307,7 @@ class WorkerStatus(WorkerBase):
 
     def action_del_ok(self):
         output.debug("DELETED: {}", self.db_info.name)
+        
 
     def action_del_conflict(self):
         output.info("DELETED-CHANGED: {}", self.db_info.name)
