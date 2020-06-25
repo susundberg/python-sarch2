@@ -249,19 +249,30 @@ class WorkerSave(WorkerBase):
         super().__init__()
         self.resolves = resolves
         self.repo = repo
+        self.files_changed = 0
+        self.files_added   = 0
+        self.files_del     = 0
 
     def action_normal_missing(self):
         self.repo.remove(self.db_info.name)
         filesystem.remove_empty_dir(self.db_info.name)
+        output.info("DELETED: {}", self.db_info.name)
+        self.files_del += 1
 
     def action_normal_ok(self):
         pass
 
     def action_normal_changed(self):
+        output.info("UPDATED: {}", self.fs_info.name)
+        self.fs_info.calc_checksum()
         self.repo.update(self.fs_info)
+        self.files_changed += 1
 
     def action_none_normal(self):
+        output.info("ADD: {}", self.fs_info.name)
+        self.fs_info.calc_checksum()
         self.repo.add(self.fs_info)
+        self.files_added += 1 
 
     def action_del_ok(self):
         pass

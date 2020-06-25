@@ -118,8 +118,11 @@ The sarch2 (v1.0.1) commands are:
                 repo=self.repo, resolves=config.really)
             paths = filesystem.make_relative(config.path)
             for path in paths:
-                commands.full_scan(path=path, worker=worker, repo=self.repo)
+                commands.full_scan(path=path, worker=worker, repo=self.repo, flag_verify=False)
             self.repo.save()
+
+            log.info("Save done, added: %d changed: %d deleted: %d", 
+                worker.files_changed, worker.files_added, worker.files_del )
             return worker.status_ok()
 
     def status_cmd(self):
