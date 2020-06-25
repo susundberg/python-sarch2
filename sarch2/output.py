@@ -1,4 +1,5 @@
 
+VERBOSE=False
 
 def info(string, *pargs):
 
@@ -7,5 +8,7 @@ def info(string, *pargs):
 
 
 def debug(string, *pargs):
+    if not VERBOSE:
+        return 
     string = string.format(*pargs)
     print(string)

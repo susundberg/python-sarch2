@@ -37,6 +37,9 @@ class RepoDir:
         if not exists:
             assert(f.exists() == False)
 
+    def file_remove_dir( self, path):
+        shutil.rmtree( Path(self.path) / Path(path) )
+
     def file_del(self, filename):
         fn = (Path(self.path) / Path(filename)).resolve()
         os.unlink(str(fn))

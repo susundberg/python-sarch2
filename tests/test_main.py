@@ -59,12 +59,22 @@ class Test(common.TestBase):
 
         self.repo.cmd("save")
         self.repo.cmd("status")
-
         self.repo.file_del(un2)
         self.repo.cmd("save")
         self.repo.cmd("status")
-
         self.repo.dir_check(un2.split("/")[0], exists=False)
+
+    def test_2_del_dir_gone(self):
+        un2 = unique_name() + "/" + unique_name()
+        self.repo.file_make(un2)
+        self.repo.cmd("save")
+        self.repo.cmd("status")
+        self.repo.file_remove_dir( un2.split("/")[0] )
+        self.repo.dir_check(un2.split("/")[0], exists=False)
+        self.repo.cmd("save")
+        self.repo.cmd("status")
+
+
 
     def test_2_del_reapear(self):
         un1 = "sub1/sub2/sub3/sub4/" + unique_name()

@@ -9,7 +9,7 @@ requires = [
 ]
 
 setup( name='sarch2',
-      version="1.0.0",
+      version="1.0.1",
       description='Simple archiving solution',
       
       scripts=['bin/sarch2'],

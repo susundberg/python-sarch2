@@ -56,6 +56,10 @@ def remove_empty_dir(path):
     log.debug("Remove dir: %s", path.parts)
     path = path.parent
 
+    if path.exists() == False:
+        return
+
+
     assert(path.is_dir())
 
     while len(path.parts) >= 0:

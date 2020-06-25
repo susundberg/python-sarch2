@@ -23,7 +23,7 @@ class Sarch2(object):
         parser = argparse.ArgumentParser(
             description='File manager',
             usage='''sarch2 <command> [<args>]
-The sarch2 commands are:
+The sarch2 (v1.0.1) commands are:
    init    <>           Create new database on current directory"
    save    <>|<path>   Saves current filesystem status to REPO, except Conflicts
    status   <>|<path>   Shows status of files, resolves conflicts
