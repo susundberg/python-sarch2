@@ -23,17 +23,17 @@ class Sarch2(object):
         parser = argparse.ArgumentParser(
             description='File manager',
             usage='''sarch2 <command> [<args>]
-The sarch2 (v1.0.1) commands are:
+The sarch2 (v1.1.0) commands are:
    init    <>           Create new database on current directory"
    save    <>|<path>   Saves current filesystem status to REPO, except Conflicts
    status   <>|<path>   Shows status of files, resolves conflicts
    save     <fn>        Saves given file to REPO
    import   <path>      Imports given path to current REPO
+   export   <path>      Exports the repository in 3GB tar gz chunks (suitable for FAT32).
    sync     <path>      Sync with remote database (rsync target)
 ''')
 
         parser.add_argument('command', help='Subcommand to run')
-
         args = parser.parse_args(sys.argv[1:2])
 
         if not hasattr(self, args.command + "_exe"):
@@ -118,11 +118,12 @@ The sarch2 (v1.0.1) commands are:
                 repo=self.repo, resolves=config.really)
             paths = filesystem.make_relative(config.path)
             for path in paths:
-                commands.full_scan(path=path, worker=worker, repo=self.repo, flag_verify=False)
+                commands.full_scan(path=path, worker=worker,
+                                   repo=self.repo, flag_verify=False)
             self.repo.save()
 
-            log.info("Save done, added: %d changed: %d deleted: %d", 
-                worker.files_changed, worker.files_added, worker.files_del )
+            log.info("Save done, added: %d changed: %d deleted: %d",
+                worker.files_added, worker.files_changed, worker.files_del)
             return worker.status_ok()
 
     def status_cmd(self):
@@ -155,7 +156,7 @@ The sarch2 (v1.0.1) commands are:
                     worker=worker,
                     repo=self.repo,
                     flag_verify=config.verify)
-        log.info("Files %d/%d nominal" % (worker.ok_files, worker.total_files ))     
+        log.info("Files %d/%d nominal" % (worker.ok_files, worker.total_files))
         return worker.status_ok()
 
     def sync_cmd(self):
@@ -175,8 +176,25 @@ The sarch2 (v1.0.1) commands are:
             config.url += "/"
 
         with self._open_db_and_cwd(False):
-
             remotes.sync(config.url, self.repo, dry_run=config.dry_run)
+
+    def export_cmd(self):
+        parser = argparse.ArgumentParser(
+            description='Export files to given path')
+        parser.add_argument('path', help="Where to export (will be postfixed with date")
+        parser.add_argument(
+            '--chunk-size',
+            default="3500M",
+            help="What size chunk to store, defaults 3500M")
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help="Do not really sync but print what would happen")    
+        return parser
+
+    def export_exe(self, config):
+        with self._open_db_and_cwd(False):
+            remotes.export( config.path, self.repo, chunk_size=config.chunk_size, dry_run=config.dry_run  )
 
     def import_cmd(self):
         parser = argparse.ArgumentParser(

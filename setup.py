@@ -4,12 +4,11 @@ __author__  = 'Pauli Salmenrinne'
 from setuptools import setup
 
 
-
 requires = [
 ]
 
 setup( name='sarch2',
-      version="1.0.1",
+      version="1.1.0",
       description='Simple archiving solution',
       
       scripts=['bin/sarch2'],

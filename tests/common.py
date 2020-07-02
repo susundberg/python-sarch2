@@ -31,6 +31,15 @@ class RepoDir:
         if not exists:
             assert(f.exists() == False)
 
+    def n_files( self, verbose=False ):
+        p = Path(self.path)
+        count = 0
+        for loop in p.glob('**/*'):
+            if verbose:
+                print("File:", loop )
+            count += 1
+        return count    
+
     def file_check(self, filename, exists):
         f = (Path(self.path) / Path(filename)).resolve()
         assert(f.is_file() == exists)
@@ -53,7 +62,6 @@ class RepoDir:
             check=True)
 
     def cmd(self, *pargs, assume_fail=False):
-
         cmd_full = ["python3", "-m", "sarch2"] + list(pargs)
         ret = subprocess.run(cmd_full)
         if not assume_fail:

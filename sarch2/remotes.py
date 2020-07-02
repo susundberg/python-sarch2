@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil
 import tempfile
 import subprocess
+import datetime
 
 from . import database
 from . import common
@@ -89,3 +90,42 @@ def sync(url, local_repo, dry_run):
         cmd = ("rsync", get_rsync_args(url, dry_run),
                "--delete", str(local_repo.path_abs) + "/", url)
         run_sync_call(cmd)
+
+
+def export( remote_path, local_repo, chunk_size, dry_run ):
+
+    #import pdb; pdb.set_trace();
+
+    remote_path = Path( remote_path ).resolve()
+    local_path  = local_repo.path_abs
+
+    if remote_path.exists() == False:
+            log.error("Target path '%s' does not exists", remote_path )
+            raise SarchExceptionSyncFail("Remote does not exists")
+    elif remote_path.is_dir() == False:
+        log.error("Remote path '%s' exists but is not directory!", remote_path )
+        raise SarchExceptionSyncFail("Remote exists and not directory!")
+    # Ok, then we are ready to do 
+    # tar czpvf - /path/to/archive | split -d -b 100M - tardisk
+    
+    local_name = str(local_path.parts[-1]) 
+    outfile = remote_path / Path( local_name + "_" + datetime.datetime.now().strftime("%Y-%d-%m") + ".split_tgz." )
+    
+    log.info("Export to '%s' -> '%s'", local_path, outfile )
+
+    cmd = "tar cpvf - .|gzip --stdout --fast|split -a 3 -d -b %s - %s" % ( chunk_size, outfile )
+    log.info("Running: '%s'", cmd )
+    if dry_run:
+        log.info("Dry run defined, skipping execution!")
+    else:
+        subprocess.run( cmd, check=True, shell=True )
+    log.info("All done, bye!")
+
+    
+
+        
+
+   
+
+
+    
